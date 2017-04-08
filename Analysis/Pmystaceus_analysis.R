@@ -238,3 +238,13 @@ dev.off()
 		text(x = bp.out, y = props+0.05, N)
 		box()
 	dev.off()
+
+# Check out sexual dimorphism between flaps
+	# morph data
+	morph <- read.csv("./Data/morph.csv")
+
+	# Multi-response model. Best because it accounts for covariance between two traits. Also, impact of SVL on both traits in a single analysis
+	mod <- MCMCglmm(c(log(right.flap.height), log(right.flap.length)) ~ Sex + log(SVL), family = c("gaussian", "gaussian"), data = adults2, rcov = ~us(trait):units)
+
+	mod.height <- glm(log(right.flap.height) ~ Sex + log(SVL), family = "gaussian", data = adults2)
+	mod.length <- glm(log(right.flap.length) ~ Sex + log(SVL), family = "gaussian", data = adults2)
