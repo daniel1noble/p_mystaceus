@@ -7,20 +7,20 @@ JNDBarplot <- function(data, name = "region", error = 1, pos, fontsize = 2, ...)
 	abline(h = 0)
 	arrows(x0 = bp.out, y0 = data, x1 = bp.out, y1 = data+error, length = 0.05, angle = 90)
 	arrows(x0 = bp.out, y0 = data, x1 = bp.out, y1 = data-error, length = 0.05, angle = 90)
-	text(name, x = max(bp.out)/2, y = pos, cex = fontsize)
+	text(name, x = max(bp.out)/2 + 0.5, y = pos, cex = fontsize)
 	bp.out
 }
 
 ## Function below will plot various spectral curves of aggregated spectral reflectance for grouping variables.
 
 plotcol <- function(x, error, x0, x1, y0, y1, region, ...){
-	plot(x[,2]~x[,1], col = "brown", type = "l", ...)
-	lines(x[,2] + error[,2] ~x[,1], col = "brown", lty = 2)
-	lines(x[,2] - error[,2] ~x[,1], col = "brown", lty = 2)
+	plot(x[,"f"]~x[,1], col = "brown", type = "l", ...)
+	lines(x[,"f"] + error[,"f"] ~x[,1], col = "brown", lty = 2)
+	lines(x[,"f"] - error[,"f"] ~x[,1], col = "brown", lty = 2)
 
-	lines(x[,4]~x[,1], col = "blue")
-	lines(x[,4] + error[,4] ~x[,1], col = "blue", lty = 2)
-	lines(x[,4] - error[,4] ~x[,1], col = "blue", lty = 2)
+	lines(x[,"m"]~x[,1], col = "blue")
+	lines(x[,"m"] + error[,"m"] ~x[,1], col = "blue", lty = 2)
+	lines(x[,"m"] - error[,"m"] ~x[,1], col = "blue", lty = 2)
 
 	#legend
 	arrows(x0, y0, x1, y1, length = 0, col = "brown", lwd = 2)
