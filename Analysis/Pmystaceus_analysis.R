@@ -90,6 +90,7 @@
 
 	coldistance_liz   <- lapply(visual_ind_liz, function(x) coldist(x, achro = TRUE, noise = "neural", n = c(1, 1, 3.5, 6),  weber = 0.1))
 
+	# Here, we only want the individual contrasts against the "sand" background. So, subset these data.
 	ind_vs_bkg_liz    <- lapply(coldistance_liz, function(x) x[x$patch2 == "sand",])
 
 	lapply(ind_vs_bkg_liz, head)
@@ -102,6 +103,7 @@
 
 	coldistance_bird <- lapply(visual_ind_bird, function(x) coldist(x, achro = TRUE, noise = "neural", n = c(1,2,3,3), weber = 0.1))
 
+	# Here, we only want the individual contrasts against the "sand" background. So, subset these data.
 	ind_vs_bkg_bird  <- lapply(coldistance_bird, function(x) x[x$patch2 == "sand",])
 
 	lapply(ind_vs_bkg_bird, head)
@@ -113,6 +115,7 @@
 
 	coldistance_snake <- lapply(visual_ind_snake, function(x) coldist(x, achro = TRUE, noise = "neural", n = c(1,1.6,7.3), weber = 0.1))
 
+	# Here, we only want the individual contrasts against the "sand" background. So, subset these data.
 	ind_vs_bkg_snake  <- lapply(coldistance_snake, function(x) x[x$patch2 == "sand",])
 
 	lapply(ind_vs_bkg_snake, head)
@@ -161,29 +164,26 @@
 	ind_vs_bkg_snake2 <- lapply(snakeJND, function(x) merge(x, adults, by = "ID"))
 
 # Test for differences between the sexes
+	savemodel = FALSE
+	
 	# Model birds
 	modelsbirdMass <- lapply(ind_vs_bkg_bird2, function(x) MCMCglmm(c(dS, dL) ~ sex + Mass, rcov = ~us(trait):units, family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = x))
-	saveRDS(modelsbirdMass, file = "./output/models_sex_MR_dSdL_birds")
 	
+	if(savemodel == TRUE){
+		saveRDS(modelsbirdMass, file = "./output/models_sex_MR_dSdL_birds")
+	}
+
 	lapply(modelsbirdMass, function(x) summary(x))
 	lapply(modelsbirdMass, function(x) plot(x))
 	lapply(modelsbirdMass, function(x) autocorr(x$VCV))
 	lapply(modelsbirdMass, function(x) autocorr(x$Sol))
 
-	#models_dS_bird <- lapply(birdJND, function(x) MCMCglmm(dS ~ sex, family = "gaussian", rcov = ~us(sex):units, data = x))
-
-	#lapply(models_dS_bird, function(x) summary(x))
-	#lapply(models_dS_bird, function(x) plot(x))
-
-	#models_dL_bird <- lapply(birdJND, function(x) MCMCglmm(dL ~ sex, rcov = ~us(sex):units, family = "gaussian", data = x))
-
-	#lapply(models_dL_bird, function(x) summary(x))
-	#lapply(models_dL_bird, function(x) plot(x))
-
 	# Model snakes
 	modelsSnakeMass <- lapply(ind_vs_bkg_snake2, function(x) MCMCglmm(c(dS, dL) ~ sex + Mass, rcov = ~us(trait):units, family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = x))
-	saveRDS(modelsSnakeMass, file = "./output/models_sex_MR_dSdL_snakes")
-
+	
+	if(savemodel == TRUE){
+		saveRDS(modelsSnakeMass, file = "./output/models_sex_MR_dSdL_snakes")
+	}
 	lapply(modelsSnakeMass, function(x) summary(x))
 	lapply(modelsSnakeMass, function(x) plot(x))	
 	lapply(modelsSnakeMass, function(x) autocorr(x$VCV))
@@ -225,21 +225,42 @@
 	chisq.test(matrix)
 	fisher.test(matrix)
 
+#####################################################################################
 ##---------------------------------- Figures--------------------------------------###
+#####################################################################################
+	## Figure 2 - Proportion behaviours in different experiments
+		## Male and females tethering and enclosure trials
+			datProp <- read.csv(file = "Data/Pmystaceus_graphs.csv", header = TRUE)
 
-	## Figure 1 - PmystaceusColour.pdf
-	pdf(file="./Figures/PmystaceusColour_10.4.17.pdf", height = 4.09, width = 10.74 )
-		par(mfrow = c(1,3),mar = c(4,3.5,1,0.3), mgp = c(2,0.5,0))
-		region <- c("Mouth", "Flap", "Dorsum")
-		ylabel <- c("Reflectance (%)", "", "")
-		xlabel <- c("", "Wavelength (nm)", "")
-		for(i in 1:3){
-			plotcol(aggregate[[i]], error[[i]], region = region[i], x0 = 300, x1 = 320, y0 = 48, y1 = 48, ylab = 	ylabel [i], xlab = xlabel[i], ylim = c(0,50), cex.lab = 1.5)
-		}
-	dev.off()
+		# Proportions
+			Props <- as.matrix(datProp[, 2:7])
+			rownames(Props) <- datProp[,1]
 
+		## Sample sizes
+			N <- as.matrix(datProp[, 8:ncol(datProp)])
+			rownames(N) <- datProp[,1]
+		
+		# Here we can conduct a fisher's exact test on counts		
+			fisher.test(N)
 
-	## dS and dL graphs for each sex
+			name <- substr(colnames(Props), 1, 9)
+			name <- gsub("Tethering", "Tether", name)
+
+			pdf(file = "./Figures/Figure2.pdf", width = 7.08, height = 6.30)
+				JNDBarplot(data = Props, error = 0, ylab = "Proportions", ylim = c(0, 1.8),  pos = 18, col = c("brown",  "blue", "white"), names.arg = name,  fontsize = 1.5) -> bp.out
+				text(x = bp.out, y = Props+0.05, N)
+				arrows(x0 = bp.out[1,1], x1 = bp.out[3,2], y0=1.2, y1 = 1.2, length = 0)
+				arrows(x0 = bp.out[1,3], x1 = bp.out[3,4], y0=1.2, y1 = 1.2, length = 0)
+				arrows(x0 = bp.out[1,5], x1 = bp.out[3,5], y0=1.2, y1 = 1.2, length = 0)
+				arrows(x0 = bp.out[1,6], x1 = bp.out[3,6], y0=1.2, y1 = 1.2, length = 0)
+				text(paste0("\\MA",":","\\MA"), vfont = c("sans serif", "bold"), xpd = TRUE, x = bp.out[3,2]/2+0.75, y =1.27, cex = 2)
+				text(paste0("\\VE",":","\\VE"), vfont = c("sans serif", "bold"), xpd = TRUE, x = bp.out[3,4]-2.85, y =1.27, cex = 2)
+				text(paste0("\\VE",":","\\MA"), vfont = c("sans serif", "bold"), xpd = TRUE, x = bp.out[2,5], y =1.27, cex = 2)
+				text(paste0("\\MA",":","\\VE"), vfont = c("sans serif", "bold"), xpd = TRUE, x = bp.out[2,6], y =1.27, cex = 2)
+				box()
+			dev.off()
+
+	## Figure 3 - dS and dL graphs for each sex and body region
 		pdf(file = "./Figures/Figure3.pdf", height = 5.973568, width = 8.86)
 			reg <- c("Mouth", "Flap", "Dorsum")
 			par(mfrow = c(2, 3),  cex.lab = 1.2, mgp = c(1.8,0.5,0), mar = c(4,3,1,0.4))
@@ -256,69 +277,49 @@
 			mtext("Just Noticeable Differences (JNDs)", side = 2, outer = TRUE, adj = 0.5, padj = 1.5)
 		dev.off()
 
-
-	## Male and females tethering and enclosure trials
-		datProp <- read.csv(file = "Data/Pmystaceus_graphs.csv", header = TRUE)
-
-	# Proportions
-		Props <- as.matrix(datProp[, 2:7])
-		rownames(Props) <- datProp[,1]
-
-	## Sample sizes
-		N <- as.matrix(datProp[, 8:ncol(datProp)])
-		rownames(N) <- datProp[,1]
-	
-	# Here we can conduct a fisher's exact test on counts		
-		fisher.test(N)
-
-		name <- substr(colnames(Props), 1, 9)
-		name <- gsub("Tethering", "Tether", name)
-
-		pdf(file = "./Figures/Male.femalepairings.pdf", width = 7.08, height = 6.30)
-			JNDBarplot(data = Props, error = 0, ylab = "Proportions", ylim = c(0, 1.8),  pos = 18, col = c("brown",  "blue", "white"), names.arg = name,  fontsize = 1.5) -> bp.out
-			text(x = bp.out, y = Props+0.05, N)
-			arrows(x0 = bp.out[1,1], x1 = bp.out[3,2], y0=1.2, y1 = 1.2, length = 0)
-			arrows(x0 = bp.out[1,3], x1 = bp.out[3,4], y0=1.2, y1 = 1.2, length = 0)
-			arrows(x0 = bp.out[1,5], x1 = bp.out[3,5], y0=1.2, y1 = 1.2, length = 0)
-			arrows(x0 = bp.out[1,6], x1 = bp.out[3,6], y0=1.2, y1 = 1.2, length = 0)
-			text(paste0("\\MA",":","\\MA"), vfont = c("sans serif", "bold"), xpd = TRUE, x = bp.out[3,2]/2+0.75, y =1.27, cex = 2)
-			text(paste0("\\VE",":","\\VE"), vfont = c("sans serif", "bold"), xpd = TRUE, x = bp.out[3,4]-2.85, y =1.27, cex = 2)
-			text(paste0("\\VE",":","\\MA"), vfont = c("sans serif", "bold"), xpd = TRUE, x = bp.out[2,5], y =1.27, cex = 2)
-			text(paste0("\\MA",":","\\VE"), vfont = c("sans serif", "bold"), xpd = TRUE, x = bp.out[2,6], y =1.27, cex = 2)
-			box()
+	## Figure 4 - Spectral reflectance curves
+		pdf(file="./Figures/Figure4.pdf", height = 4.09, width = 10.74 )
+			par(mfrow = c(1,3),mar = c(4,3.5,1,0.3), mgp = c(2,0.5,0))
+			region <- c("Mouth", "Flap", "Dorsum")
+			ylabel <- c("Reflectance (%)", "", "")
+			xlabel <- c("", "Wavelength (nm)", "")
+			for(i in 1:3){
+				plotcol(aggregate[[i]], error[[i]], region = region[i], x0 = 300, x1 = 320, y0 = 48, y1 = 48, ylab = 	ylabel [i], xlab = xlabel[i], ylim = c(0,50), cex.lab = 1.5)
+			}
 		dev.off()
 
-	## Bird flaring trials tethering
-		BirdProp <- read.csv(file = "Data/graphs_birdfield.csv")[1:4,]
+	## Figure 5 - Bird flaring trials tethering
+			BirdProp <- read.csv(file = "Data/graphs_birdfield.csv")[1:4,]
 
-	# Behaviour proportions
-		props <- as.matrix(BirdProp[,2:4])
-		rownames(props) <- BirdProp[,1]
+		# Behaviour proportions
+			props <- as.matrix(BirdProp[,2:4])
+			rownames(props) <- firstup(as.character(BirdProp[,1]))
 
-	# N proportions
-		N <- as.matrix(BirdProp[,5:ncol(BirdProp)])
-		rownames(N) <- BirdProp[,1]
+		# N proportions
+			N <- as.matrix(BirdProp[,5:ncol(BirdProp)])
+			rownames(N) <- firstup(as.character(BirdProp[,1]))
 
-		pdf(file = "./Figures/Bird_field.pdf", height = 6.10, width = 6.5)
-			JNDBarplot(data = props, error = 0, ylab = "Proportions", ylim = c(0, 1.6), pos = 1.8, col = c("brown",  "blue", "white", "gray"), names.arg = c("Males", "Females", "Juveniles"),  fontsize = 1.5) -> bp.out
-			text(x = bp.out, y = props+0.05, N)
-			box()
-		dev.off()
+			pdf(file = "./Figures/Figure5.pdf", height = 6.10, width = 6.5)
+				JNDBarplot(data = props, error = 0, ylab = "Proportions", ylim = c(0, 1.6), pos = 1.8, col = c("brown",  "blue", "white", "gray"), names.arg = c("Males", "Females", "Juveniles"),  fontsize = 1.5) -> bp.out
+				text(x = bp.out, y = props+0.05, N)
+				box()
+			dev.off()
 
-	## Noosing trials field
-		NooseProp <- read.csv(file = "Data/graphs_noose.csv")
+	## Figure 6 - Noosing trials field
+			NooseProp <- read.csv(file = "Data/noosing_fig6.csv")
 
-	# Behaviour proportions
-		props <- as.matrix(NooseProp[,c(2:4)])
-		rownames(props) <- NooseProp[,1]
+		# Behaviour proportions
 
-	# N proportions
-		N <- c()
-		rownames(N) <- NooseProp[,1]
+			props <- as.matrix(NooseProp[,2])
+			rownames(props) <- NooseProp[,1]
 
-		pdf(file = "./Figures/Noose_field.pdf", height = 6.10, width = 6.5)
-			JNDBarplot(data = props, ylab = "Proportions", error = 0, ylim = c(0, 1.8),  pos = 1.8, name = "", col = c("brown",  "blue", "white"), names.arg = c("Flaps flared"),  fontsize = 1.5, space = 0.10) -> bp.out
-			text(x = bp.out, y = props/2, paste0(props*100, "%"))
-			text(x = bp.out, y = props+0.05, N)
-			box()
-		dev.off()
+		# N proportions
+			N <- NooseProp[,3]
+			rownames(N) <- NooseProp[,1]
+
+			pdf(file = "./Figures/Figure6.pdf", height = 6.10, width = 6.5)
+				JNDBarplot(data = props, ylab = "Proportions", error = 0, ylim = c(0, 1.8),  pos = 1.8, name = "", col = c("brown",  "blue", "white"), names.arg = c("Flaps flared"),  fontsize = 1.5, space = 0.10) -> bp.out
+				text(x = bp.out, y = props/2, paste0(props*100, "%"))
+				text(x = bp.out, y = props+0.05, N)
+				box()
+			dev.off()
