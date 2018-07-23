@@ -12,6 +12,7 @@
 	library(plotrix)
 	library(plyr)
 	library(MCMCglmm)
+	library(Hmisc)
 
 ## Load functions. Note for Martin: Make sure you set the working dir in R before running code setwd("~/Desktop/Dropbox/Phrynocephalus_mystaceus/")
 	source("./Analysis/func.R")
@@ -136,6 +137,7 @@
 	}
 
 	names(aggregate) <- names(ind_agg)
+	names(error) <- names(ind_agg)
 
 #Create sex vector
 	sex  <- lapply(ind_vs_bkg_bird, function(x) substr(x[,1],1,1))
@@ -190,20 +192,20 @@
 	lapply(modelsSnakeMass, function(x) autocorr(x$Sol))
 
 # Average JNDs for each region and produce se's
-	avgbirdJND <- lapply(birdJND, function(x) ddply(x, .(sex), summarise, meandS = mean(dS), sedS = std.error(dS), meandL = mean(dL), sedL = std.error(dL), n = length(dS))) 
+	avgbirdJND_sum <- lapply(birdJND, function(x) ddply(x, .(sex), summarise, meandS = mean(dS), sedS = std.error(dS), meandL = mean(dL), sedL = std.error(dL), n = length(dS))) 
 
-	avgsnakeJND <- lapply(snakeJND, function(x) ddply(x, .(sex), summarise, meandS = mean(dS), sedS = std.error(dS), meandL = mean(dL), sedL = std.error(dL), n = length(dS))) 
+	avgsnakeJND_sum <- lapply(snakeJND, function(x) ddply(x, .(sex), summarise, meandS = mean(dS), sedS = std.error(dS), meandL = mean(dL), sedL = std.error(dL), n = length(dS))) 
 
 # Make sure to source the JND plot function
-	avgbirdJND <- lapply(avgbirdJND, function(x){rownames(x) <- c("f", "j", "m"); x})
+	avgbirdJND_sum <- lapply(avgbirdJND_sum, function(x){rownames(x) <- c("f", "j", "m"); x})
 
-	error <- list()
-	error <- lapply(avgbirdJND, function(x) x[,c(3,5)])
+	error_bird <- list()
+	error_bird <- lapply(avgbirdJND_sum, function(x) x[,c(3,5)])
 
-	avgsnakeJND <- lapply(avgsnakeJND, function(x){rownames(x) <- c("f", "j", "m"); x})
+	avgsnakeJND_sum <- lapply(avgsnakeJND_sum, function(x){rownames(x) <- c("f", "j", "m"); x})
 
-	error <- list()
-	error <- lapply(avgsnakeJND, function(x) x[,c(3,5)])
+	error_snake <- list()
+	error_snake <- lapply(avgsnakeJND_sum, function(x) x[,c(3,5)])
 
 # Check out sexual dimorphism between flaps
 	# Multi-response model. Best because it accounts for covariance between two traits. Also, impact of SVL on both traits in a single analysis
@@ -262,15 +264,15 @@
 
 	## Figure 3 - dS and dL graphs for each sex and body region
 		pdf(file = "./Figures/Figure3.pdf", height = 5.973568, width = 8.86)
-			reg <- c("Mouth", "Flap", "Dorsum")
+			reg <- c("flap", "mouth", "dorsum")
 			par(mfrow = c(2, 3),  cex.lab = 1.2, mgp = c(1.8,0.5,0), mar = c(4,3,1,0.4))
-			for(i in 1:3){
-				JNDBarplot(data = as.matrix(avgbirdJND[[i]][,c(2,4)]), error = as.matrix(error[[i]]), ylab = "", ylim = c(0, 10), name = reg[i], pos = 9, col = c("brown", "white", "blue"), names.arg = c("Chromatic", "Achromatic"), fontsize = 1.5, las = 1)
+			for(i in reg){
+				JNDBarplot(data = as.matrix(avgbirdJND_sum[[i]][,c(2,4)]), error = as.matrix(error_bird[[i]]), ylab = "", ylim = c(0, 10), name = capitalize(i), pos = 9, col = c("brown", "white", "blue"), names.arg = c("Chromatic", "Achromatic"), fontsize = 1.5, las = 1)
 				box()
 			}
 
-			for(i in 1:3){
-				JNDBarplot(data = as.matrix(avgsnakeJND[[i]][,c(2,4)]), error = as.matrix(error[[i]]), ylab = "", ylim = c(0, 10), name = reg[i], pos = 9, col = c("brown", "white", "blue"), names.arg = c("Chromatic", "Achromatic"), fontsize = 1.5, las = 1)
+			for(i in reg){
+				JNDBarplot(data = as.matrix(avgsnakeJND_sum[[i]][,c(2,4)]), error = as.matrix(error_snake[[i]]), ylab = "", ylim = c(0, 10), name = capitalize(i), pos = 9, col = c("brown", "white", "blue"), names.arg = c("Chromatic", "Achromatic"), fontsize = 1.5, las = 1)
 				box()
 			}
 
@@ -278,13 +280,17 @@
 		dev.off()
 
 	## Figure 4 - Spectral reflectance curves
-		pdf(file="./Figures/Figure4.pdf", height = 4.09, width = 10.74 )
+		pdf(file="./Figures/Figure3.pdf", height = 4.09, width = 10.74 )
 			par(mfrow = c(1,3),mar = c(4,3.5,1,0.3), mgp = c(2,0.5,0))
-			region <- c("Mouth", "Flap", "Dorsum")
+			region <- c("flap", "mouth", "dorsum")
 			ylabel <- c("Reflectance (%)", "", "")
 			xlabel <- c("", "Wavelength (nm)", "")
+
+			#re-order if needed
+			aggregate_order <- aggregate[region]
+			    error_order <- error[region]
 			for(i in 1:3){
-				plotcol(aggregate[[i]], error[[i]], region = region[i], x0 = 300, x1 = 320, y0 = 48, y1 = 48, ylab = 	ylabel [i], xlab = xlabel[i], ylim = c(0,50), cex.lab = 1.5)
+				plotcol(aggregate_order[[i]], error_order[[i]], region = capitalize(region[i]), x0 = 300, x1 = 320, y0 = 48, y1 = 48, ylab = 	ylabel [i], xlab = xlabel[i], ylim = c(0,50), cex.lab = 1.5)
 			}
 		dev.off()
 
