@@ -262,24 +262,8 @@
 				box()
 			dev.off()
 
-	## Figure 3 - dS and dL graphs for each sex and body region
-		pdf(file = "./Figures/Figure3.pdf", height = 5.973568, width = 8.86)
-			reg <- c("flap", "mouth", "dorsum")
-			par(mfrow = c(2, 3),  cex.lab = 1.2, mgp = c(1.8,0.5,0), mar = c(4,3,1,0.4))
-			for(i in reg){
-				JNDBarplot(data = as.matrix(avgbirdJND_sum[[i]][,c(2,4)]), error = as.matrix(error_bird[[i]]), ylab = "", ylim = c(0, 10), name = capitalize(i), pos = 9, col = c("brown", "white", "blue"), names.arg = c("Chromatic", "Achromatic"), fontsize = 1.5, las = 1)
-				box()
-			}
-
-			for(i in reg){
-				JNDBarplot(data = as.matrix(avgsnakeJND_sum[[i]][,c(2,4)]), error = as.matrix(error_snake[[i]]), ylab = "", ylim = c(0, 10), name = capitalize(i), pos = 9, col = c("brown", "white", "blue"), names.arg = c("Chromatic", "Achromatic"), fontsize = 1.5, las = 1)
-				box()
-			}
-
-			mtext("Just Noticeable Differences (JNDs)", side = 2, outer = TRUE, adj = 0.5, padj = 1.5)
-		dev.off()
-
-	## Figure 4 - Spectral reflectance curves
+	
+	## Figure 3 - Spectral reflectance curves
 		pdf(file="./Figures/Figure3.pdf", height = 4.09, width = 10.74 )
 			par(mfrow = c(1,3),mar = c(4,3.5,1,0.3), mgp = c(2,0.5,0))
 			region <- c("flap", "mouth", "dorsum")
@@ -292,6 +276,30 @@
 			for(i in 1:3){
 				plotcol(aggregate_order[[i]], error_order[[i]], region = capitalize(region[i]), x0 = 300, x1 = 320, y0 = 48, y1 = 48, ylab = 	ylabel [i], xlab = xlabel[i], ylim = c(0,50), cex.lab = 1.5)
 			}
+		dev.off()
+
+	## Figure 4 - dS and dL graphs for each sex and body region
+		pdf(file = "./Figures/Figure4.pdf", height = 5.973568, width = 8.86)
+			reg <- c("flap", "mouth", "dorsum")
+			letters1 <- paste0("(", c("A", "B", "C"), ")")
+
+			par(mfrow = c(2, 3),  cex.lab = 1.2, mgp = c(1.8,0.5,0), mar = c(4,3,1,0.4))
+			for(i in reg){
+				JNDBarplot(data = as.matrix(avgbirdJND_sum[[i]][,c(2,4)]), error = as.matrix(error_bird[[i]]), ylab = "", ylim = c(0, 10), name = capitalize(i), pos = 9, col = c("brown", "white", "blue"), names.arg = c("Chromatic", "Achromatic"), fontsize = 1.5, las = 1) -> bp.out
+				j <- grep(i, reg)
+				text(letters1[j],x = bp.out[1,1], y = 9, cex = 2)
+				box()
+			}
+
+				letters2 <- paste0("(", c("D", "E", "F"), ")")
+			for(i in reg){
+				JNDBarplot(data = as.matrix(avgsnakeJND_sum[[i]][,c(2,4)]), error = as.matrix(error_snake[[i]]), ylab = "", ylim = c(0, 10), name = capitalize(i), pos = 9, col = c("brown", "white", "blue"), names.arg = c("Chromatic", "Achromatic"), fontsize = 1.5, las = 1)
+				j <- grep(i, reg)
+				text(letters2[j],x = bp.out[1,1], y = 9, cex = 2)
+				box()
+			}
+
+			mtext("Just Noticeable Differences (JNDs)", side = 2, outer = TRUE, adj = 0.5, padj = 1.5)
 		dev.off()
 
 	## Figure 5 - Bird flaring trials tethering
