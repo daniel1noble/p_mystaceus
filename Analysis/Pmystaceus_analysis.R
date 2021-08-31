@@ -13,6 +13,7 @@
 	library(plyr)
 	library(MCMCglmm)
 	library(Hmisc)
+	library(DIZutils)
 
 ## Load functions. Note for Martin: Make sure you set the working dir in R before running code setwd("~/Desktop/Dropbox/Phrynocephalus_mystaceus/")
 	source("./Analysis/func.R")
@@ -249,7 +250,7 @@
 			name <- gsub("Tethering", "Tether", name)
 
 			pdf(file = "./Figures/Figure2.pdf", width = 7.08, height = 6.30)
-				JNDBarplot(data = Props, error = 0, ylab = "Proportions", ylim = c(0, 1.8),  pos = 18, col = c("brown",  "blue", "white"), names.arg = name,  fontsize = 1.5) -> bp.out
+				JNDBarplot(data = Props, error = 0, ylab = "Proportions", ylim = c(0, 1.8),  pos = 18, col = c("red",  "orange", "blue"), names.arg = name,  fontsize = 1.5) -> bp.out
 				text(x = bp.out, y = Props+0.05, N)
 				arrows(x0 = bp.out[1,1], x1 = bp.out[3,2], y0=1.2, y1 = 1.2, length = 0)
 				arrows(x0 = bp.out[1,3], x1 = bp.out[3,4], y0=1.2, y1 = 1.2, length = 0)
@@ -263,8 +264,8 @@
 			dev.off()
 
 	
-	## Figure 3 - Spectral reflectance curves
-		pdf(file="./Figures/Figure3.pdf", height = 4.09, width = 10.74 )
+	## Figure 5 - Spectral reflectance curves
+		pdf(file="./Figures/Figure5.pdf", height = 4.09, width = 10.74 )
 			par(mfrow = c(1,3),mar = c(4,3.5,1,0.3), mgp = c(2,0.5,0))
 			region <- c("flap", "mouth", "dorsum")
 			ylabel <- c("Reflectance (%)", "", "")
@@ -278,14 +279,14 @@
 			}
 		dev.off()
 
-	## Figure 4 - dS and dL graphs for each sex and body region
-		pdf(file = "./Figures/Figure4.pdf", height = 5.973568, width = 8.86)
+	## Figure 6 - dS and dL graphs for each sex and body region
+		pdf(file = "./Figures/Figure6.pdf", height = 5.973568, width = 8.86)
 			reg <- c("flap", "mouth", "dorsum")
 			letters1 <- paste0("(", c("A", "B", "C"), ")")
 
 			par(mfrow = c(2, 3),  cex.lab = 1.2, mgp = c(1.8,0.5,0), mar = c(4,3,1,0.4))
 			for(i in reg){
-				JNDBarplot(data = as.matrix(avgbirdJND_sum[[i]][,c(2,4)]), error = as.matrix(error_bird[[i]]), ylab = "", ylim = c(0, 10), name = capitalize(i), pos = 9, col = c("brown", "white", "blue"), names.arg = c("Chromatic", "Achromatic"), fontsize = 1.5, las = 1) -> bp.out
+				JNDBarplot(data = as.matrix(avgbirdJND_sum[[i]][,c(2,4)]), error = as.matrix(error_bird[[i]]), ylab = "", ylim = c(0, 10), name = capitalize(i), pos = 9, col = c("brown", "white", "blue"), names.arg = c("Chromatic", "Luminance"), fontsize = 1.5, las = 1) -> bp.out
 				j <- grep(i, reg)
 				text(letters1[j],x = bp.out[1,1], y = 9, cex = 2)
 				box()
@@ -293,7 +294,7 @@
 
 				letters2 <- paste0("(", c("D", "E", "F"), ")")
 			for(i in reg){
-				JNDBarplot(data = as.matrix(avgsnakeJND_sum[[i]][,c(2,4)]), error = as.matrix(error_snake[[i]]), ylab = "", ylim = c(0, 10), name = capitalize(i), pos = 9, col = c("brown", "white", "blue"), names.arg = c("Chromatic", "Achromatic"), fontsize = 1.5, las = 1)
+				JNDBarplot(data = as.matrix(avgsnakeJND_sum[[i]][,c(2,4)]), error = as.matrix(error_snake[[i]]), ylab = "", ylim = c(0, 10), name = capitalize(i), pos = 9, col = c("brown", "white", "blue"), names.arg = c("Chromatic", "Luminance"), fontsize = 1.5, las = 1)
 				j <- grep(i, reg)
 				text(letters2[j],x = bp.out[1,1], y = 9, cex = 2)
 				box()
@@ -302,7 +303,7 @@
 			mtext("Just Noticeable Differences (JNDs)", side = 2, outer = TRUE, adj = 0.5, padj = 1.5)
 		dev.off()
 
-	## Figure 5 - Bird flaring trials tethering
+	## Figure 3 - Bird flaring trials tethering
 			BirdProp <- read.csv(file = "Data/graphs_birdfield.csv")[1:4,]
 
 		# Behaviour proportions
@@ -313,13 +314,13 @@
 			N <- as.matrix(BirdProp[,5:ncol(BirdProp)])
 			rownames(N) <- firstup(as.character(BirdProp[,1]))
 
-			pdf(file = "./Figures/Figure5.pdf", height = 6.10, width = 6.5)
+			pdf(file = "./Figures/Figure3.pdf", height = 6.10, width = 6.5)
 				JNDBarplot(data = props, error = 0, ylab = "Proportions", ylim = c(0, 1.6), pos = 1.8, col = c("brown",  "blue", "white", "gray"), names.arg = c("Males", "Females", "Juveniles"),  fontsize = 1.5) -> bp.out
 				text(x = bp.out, y = props+0.05, N)
 				box()
 			dev.off()
 
-	## Figure 6 - Noosing trials field
+	## Figure 4 - Noosing trials field
 			NooseProp <- read.csv(file = "Data/noosing_fig6.csv")
 
 		# Behaviour proportions
@@ -328,11 +329,11 @@
 			rownames(props) <- NooseProp[,1]
 
 		# N proportions
-			N <- NooseProp[,3]
+			N <- as.matrix(NooseProp[,3])
 			rownames(N) <- NooseProp[,1]
 
-			pdf(file = "./Figures/Figure6.pdf", height = 6.10, width = 6.5)
-				JNDBarplot(data = props, ylab = "Proportions", error = 0, ylim = c(0, 1.8),  pos = 1.8, name = "", col = c("brown",  "blue", "white"), names.arg = c("Flaps flared"),  fontsize = 1.5, space = 0.10) -> bp.out
+			pdf(file = "./Figures/Figure4.pdf", height = 6.10, width = 6.5)
+				JNDBarplot(data = props, ylab = "Proportions", error = 0, ylim = c(0, 1.8),  pos = 1.8, name = "", col = c("blue", "brown", "white"), names.arg = c("Flaps flared"),  fontsize = 1.5, space = 0.10) -> bp.out
 				text(x = bp.out, y = props/2, paste0(props*100, "%"))
 				text(x = bp.out, y = props+0.05, N)
 				box()
