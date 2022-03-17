@@ -141,6 +141,9 @@
 	names(error) <- names(ind_agg)
 
 #Create sex vector
+	sexliz  <- lapply(ind_vs_bkg_liz, function(x) substr(x[,1],1,1))
+	ind_ID_col_liz <- lapply(ind_vs_bkg_liz, function(x) gsub("[fjm].liz","", x[,1]))
+
 	sex  <- lapply(ind_vs_bkg_bird, function(x) substr(x[,1],1,1))
 	ind_ID_col <- lapply(ind_vs_bkg_bird, function(x) gsub("[fjm].liz","", x[,1]))
 
@@ -148,6 +151,13 @@
 	ind_ID_col2 <- lapply(ind_vs_bkg_snake, function(x) gsub("[fjm].liz","", x[,1]))
 
 # Create a new data frame for each region and add sex
+	lizardJND <- list()
+
+	for(i in 1:3){
+		lizardJND[[i]] <- cbind(ind_vs_bkg_liz[[i]], sex = sexliz[[i]], ID = ind_ID_col_liz[[i]])	
+	}
+	names(lizardJND) <- names(ind_vs_bkg_liz)
+
 	birdJND <- list()
 
 	for(i in 1:3){
@@ -163,12 +173,20 @@
 	names(snakeJND) <- names(ind_vs_bkg_snake)
 
 # Match the morphology data with the ID column so that chromatic and achromatic contrasts match.
+	ind_vs_bkg_lizard2 <- lapply(lizardJND, function(x) merge(x, adults, by = "ID"))
 	ind_vs_bkg_bird2 <- lapply(birdJND, function(x) merge(x, adults, by = "ID"))
 	ind_vs_bkg_snake2 <- lapply(snakeJND, function(x) merge(x, adults, by = "ID"))
 
 # Test for differences between the sexes
 	savemodel = FALSE
 	
+	# Model lizards
+	modelslizardMass <- lapply(ind_vs_bkg_lizard2, function(x) MCMCglmm(c(dS, dL) ~ sex + Mass, rcov = ~us(trait):units, family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = x))
+	
+	if(savemodel == TRUE){
+		saveRDS(modelsbirdMass, file = "./output/models_sex_MR_dSdL_lizards")
+	}
+
 	# Model birds
 	modelsbirdMass <- lapply(ind_vs_bkg_bird2, function(x) MCMCglmm(c(dS, dL) ~ sex + Mass, rcov = ~us(trait):units, family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = x))
 	
