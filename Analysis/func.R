@@ -31,3 +31,17 @@ plotcol <- function(x, error, x0, x1, y0, y1, region, ...){
 	text(x = 500, y = 45, region, cex = 2)
 }
 
+sex_contrast <- function(model, m, f){
+	m <- model$Sol[,m]
+	f <- model$Sol[,f]
+
+	c <- m - f
+	mean_c <- mean(c)
+	hpd <- HPDinterval(c)
+	pmcmc <- 2*(1 - max(table(c<0) / length(c)))
+
+return(data.frame(Est = mean_c, 
+				 "L95%" = hpd[,"lower"], 
+				 "U95%" = hpd[,"upper"],
+				 pMCMC = pmcmc, check.names = FALSE, row.names = NULL))
+}
