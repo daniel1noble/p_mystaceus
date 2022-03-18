@@ -350,7 +350,7 @@
 			pdf(file = "./Figures/Figure3.pdf", height = 6.10, width = 6.5)
 				JNDBarplot(data = props, error = 0, ylab = "Proportions", ylim = c(0, 1.6), pos = 1.8, col = c("brown",  "blue", "white", "gray"), names.arg = c("Males", "Females", "Juveniles"),  fontsize = 1.5) -> bp.out
 				text(x = bp.out, y = props+0.05, N)
-				#box()
+				box()
 			dev.off()
 
 	## Figure 4 - Noosing trials field
