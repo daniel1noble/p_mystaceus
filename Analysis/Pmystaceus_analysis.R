@@ -268,6 +268,7 @@
 			name <- gsub("Tethering", "Tether", name)
 
 			pdf(file = "./Figures/Figure2.pdf", width = 7.08, height = 6.30)
+			row.names(Props)[2] <- "Tail signalling"
 				JNDBarplot(data = Props, error = 0, ylab = "Proportions", ylim = c(0, 1.8),  pos = 18, col = c("red",  "orange", "blue"), names.arg = name,  fontsize = 1.5) -> bp.out
 				text(x = bp.out, y = Props+0.05, N)
 				arrows(x0 = bp.out[1,1], x1 = bp.out[3,2], y0=1.2, y1 = 1.2, length = 0)
