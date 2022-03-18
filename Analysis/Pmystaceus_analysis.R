@@ -184,7 +184,7 @@
 	modelslizardMass <- lapply(ind_vs_bkg_lizard2, function(x) MCMCglmm(c(dS, dL) ~ sex + Mass, rcov = ~us(trait):units, family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = x))
 	
 	if(savemodel == TRUE){
-		saveRDS(modelsbirdMass, file = "./output/models_sex_MR_dSdL_lizards")
+		saveRDS(modelslizardMass, file = "./output/models_sex_MR_dSdL_lizards")
 	}
 
 	# Model birds
