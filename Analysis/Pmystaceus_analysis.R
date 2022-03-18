@@ -178,20 +178,30 @@
 	ind_vs_bkg_snake2 <- lapply(snakeJND, function(x) merge(x, adults, by = "ID"))
 
 # Test for differences between the sexes
-	savemodel = FALSE
+	rerun = FALSE
 	
+	if(rerun){
 	# Model lizards
 	modelslizardMass <- lapply(ind_vs_bkg_lizard2, function(x) MCMCglmm(c(dS, dL) ~ sex + Mass, rcov = ~us(trait):units, family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = x))
 	
-	if(savemodel == TRUE){
 		saveRDS(modelslizardMass, file = "./output/models_sex_MR_dSdL_lizards")
+	
+	} else {
+	modelslizardMass <- readRDS("./output/models_sex_MR_dSdL_lizards")
 	}
 
+	lapply(modelslizardMass, function(x) summary(x))
+	lapply(modelslizardMass, function(x) plot(x))
+	lapply(modelslizardMass, function(x) autocorr(x$VCV))
+	lapply(modelslizardMass, function(x) autocorr(x$Sol))
+
+	if(rerun){
 	# Model birds
 	modelsbirdMass <- lapply(ind_vs_bkg_bird2, function(x) MCMCglmm(c(dS, dL) ~ sex + Mass, rcov = ~us(trait):units, family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = x))
 	
-	if(savemodel == TRUE){
 		saveRDS(modelsbirdMass, file = "./output/models_sex_MR_dSdL_birds")
+	} else {
+		modelsbirdMass <- readRDS("./output/models_sex_MR_dSdL_birds")
 	}
 
 	lapply(modelsbirdMass, function(x) summary(x))
@@ -199,12 +209,15 @@
 	lapply(modelsbirdMass, function(x) autocorr(x$VCV))
 	lapply(modelsbirdMass, function(x) autocorr(x$Sol))
 
+	if(rerun){
 	# Model snakes
 	modelsSnakeMass <- lapply(ind_vs_bkg_snake2, function(x) MCMCglmm(c(dS, dL) ~ sex + Mass, rcov = ~us(trait):units, family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = x))
-	
-	if(savemodel == TRUE){
+
 		saveRDS(modelsSnakeMass, file = "./output/models_sex_MR_dSdL_snakes")
+	} else {
+		modelsSnakeMass <- readRDS("./output/models_sex_MR_dSdL_snakes")
 	}
+
 	lapply(modelsSnakeMass, function(x) summary(x))
 	lapply(modelsSnakeMass, function(x) plot(x))	
 	lapply(modelsSnakeMass, function(x) autocorr(x$VCV))
@@ -228,15 +241,16 @@
 
 # Check out sexual dimorphism between flaps
 	# Multi-response model. Best because it accounts for covariance between two traits. Also, impact of SVL on both traits in a single analysis
-	mod <- MCMCglmm(c(log(right.flap.height), log(right.flap.length)) ~ Sex + log(SVL), family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = adults, rcov = ~us(trait):units)
-
-	summary(mod)
-	plot(mod)
-	autocorr(mod$VCV)
-	autocorr(mod$Sol)
-
-	#mod.height <- glm(log(right.flap.height) ~ Sex + log(SVL), family = "gaussian", data = adults)
-	#mod.length <- glm(log(right.flap.length) ~ Sex + log(SVL), family = "gaussian", data = adults)
+	if(rerun){
+	modSD <- MCMCglmm(c(log(right.flap.height), log(right.flap.length)) ~ Sex + log(SVL), family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = adults, rcov = ~us(trait):units)
+	saveRDS(modSD, "./output/modSD_morph")
+} else {
+	modSD <- readRDS("./output/modSD_morph")
+}
+	summary(modSD)
+	plot(modSD)
+	autocorr(modSD$VCV)
+	autocorr(modSD$Sol)
 
 # Flaps flaring analysis
 	matrix <- matrix(c(21,4, 12.5, 12.5), ncol = 2, nrow = 2)
@@ -308,7 +322,7 @@
 				JNDBarplot(data = as.matrix(avgbirdJND_sum[[i]][,c(2,4)]), error = as.matrix(error_bird[[i]]), ylab = "", ylim = c(0, 10), name = capitalize(i), pos = 9, col = c("brown", "white", "blue"), names.arg = c("Chromatic", "Luminance"), fontsize = 1.5, las = 1) -> bp.out
 				j <- grep(i, reg)
 				text(letters1[j],x = bp.out[1,1], y = 9, cex = 2)
-				box()
+				#box()
 			}
 
 				letters2 <- paste0("(", c("D", "E", "F"), ")")
@@ -316,7 +330,7 @@
 				JNDBarplot(data = as.matrix(avgsnakeJND_sum[[i]][,c(2,4)]), error = as.matrix(error_snake[[i]]), ylab = "", ylim = c(0, 10), name = capitalize(i), pos = 9, col = c("brown", "white", "blue"), names.arg = c("Chromatic", "Luminance"), fontsize = 1.5, las = 1)
 				j <- grep(i, reg)
 				text(letters2[j],x = bp.out[1,1], y = 9, cex = 2)
-				box()
+				#box()
 			}
 
 			mtext("Just Noticeable Differences (JNDs)", side = 2, outer = TRUE, adj = 0.5, padj = 1.5)
@@ -336,7 +350,7 @@
 			pdf(file = "./Figures/Figure3.pdf", height = 6.10, width = 6.5)
 				JNDBarplot(data = props, error = 0, ylab = "Proportions", ylim = c(0, 1.6), pos = 1.8, col = c("brown",  "blue", "white", "gray"), names.arg = c("Males", "Females", "Juveniles"),  fontsize = 1.5) -> bp.out
 				text(x = bp.out, y = props+0.05, N)
-				box()
+				#box()
 			dev.off()
 
 	## Figure 4 - Noosing trials field
