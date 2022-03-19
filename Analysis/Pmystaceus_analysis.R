@@ -227,6 +227,8 @@
 	lapply(modelsSnakeMass, function(x) plot(x))	
 	lapply(modelsSnakeMass, function(x) autocorr(x$VCV))
 	lapply(modelsSnakeMass, function(x) autocorr(x$Sol))
+	lapply(modelsSnakeMass, function(x) sex_contrast(x, m = "traitdS:Sexm", f = "traitdS:Sexf"))
+	lapply(modelsSnakeMass, function(x) sex_contrast(x, m = "traitdL:Sexm", f = "traitdL:Sexf"))
 
 # Average JNDs for each region and produce se's
 	avgbirdJND_sum <- lapply(birdJND, function(x) ddply(x, .(sex), summarise, meandS = mean(dS), sedS = std.error(dS), meandL = mean(dL), sedL = std.error(dL), n = length(dS))) 
