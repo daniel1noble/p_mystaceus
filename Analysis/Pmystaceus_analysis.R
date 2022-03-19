@@ -141,13 +141,13 @@
 	names(error) <- names(ind_agg)
 
 #Create sex vector
-	sexliz  <- lapply(ind_vs_bkg_liz, function(x) substr(x[,1],1,1))
+	sexliz  <- lapply(ind_vs_bkg_liz, function(x) factor(substr(x[,1],1,1), levels = c("m", "f", "j")))
 	ind_ID_col_liz <- lapply(ind_vs_bkg_liz, function(x) gsub("[fjm].liz","", x[,1]))
 
-	sex  <- lapply(ind_vs_bkg_bird, function(x) substr(x[,1],1,1))
+	sex  <- lapply(ind_vs_bkg_bird, function(x) factor(substr(x[,1],1,1), levels = c("m", "f", "j")))
 	ind_ID_col <- lapply(ind_vs_bkg_bird, function(x) gsub("[fjm].liz","", x[,1]))
 
-	sex2  <- lapply(ind_vs_bkg_snake, function(x) substr(x[,1],1,1))
+	sex2  <- lapply(ind_vs_bkg_snake, function(x) factor(substr(x[,1],1,1), levels = c("m", "f", "j")))
 	ind_ID_col2 <- lapply(ind_vs_bkg_snake, function(x) gsub("[fjm].liz","", x[,1]))
 
 # Create a new data frame for each region and add sex
@@ -182,7 +182,8 @@
 	
 	if(rerun){
 	# Model lizards
-	modelslizardMass <- lapply(ind_vs_bkg_lizard2, function(x) MCMCglmm(c(dS, dL) ~ sex + Mass, rcov = ~us(trait):units, family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = x))
+
+	modelslizardMass <- lapply(ind_vs_bkg_lizard2, function(x) MCMCglmm(c(dS, dL) ~ -1+ trait:Sex + trait:Mass, rcov = ~us(trait):units, family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = x))
 	
 		saveRDS(modelslizardMass, file = "./output/models_sex_MR_dSdL_lizards")
 	
@@ -194,10 +195,12 @@
 	lapply(modelslizardMass, function(x) plot(x))
 	lapply(modelslizardMass, function(x) autocorr(x$VCV))
 	lapply(modelslizardMass, function(x) autocorr(x$Sol))
+	lapply(modelslizardMass, function(x) sex_contrast(x, m = "traitdS:Sexm", f = "traitdS:Sexf"))
+	lapply(modelslizardMass, function(x) sex_contrast(x, m = "traitdL:Sexm", f = "traitdL:Sexf"))
 
 	if(rerun){
 	# Model birds
-	modelsbirdMass <- lapply(ind_vs_bkg_bird2, function(x) MCMCglmm(c(dS, dL) ~ sex + Mass, rcov = ~us(trait):units, family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = x))
+	modelsbirdMass <- lapply(ind_vs_bkg_bird2, function(x) MCMCglmm(c(dS, dL) ~ -1 + trait:Sex + trait:Mass, rcov = ~us(trait):units, family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = x))
 	
 		saveRDS(modelsbirdMass, file = "./output/models_sex_MR_dSdL_birds")
 	} else {
@@ -208,10 +211,12 @@
 	lapply(modelsbirdMass, function(x) plot(x))
 	lapply(modelsbirdMass, function(x) autocorr(x$VCV))
 	lapply(modelsbirdMass, function(x) autocorr(x$Sol))
+	lapply(modelsbirdMass, function(x) sex_contrast(x, m = "traitdS:Sexm", f = "traitdS:Sexf"))
+	lapply(modelsbirdMass, function(x) sex_contrast(x, m = "traitdL:Sexm", f = "traitdL:Sexf"))
 
 	if(rerun){
 	# Model snakes
-	modelsSnakeMass <- lapply(ind_vs_bkg_snake2, function(x) MCMCglmm(c(dS, dL) ~ sex + Mass, rcov = ~us(trait):units, family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = x))
+	modelsSnakeMass <- lapply(ind_vs_bkg_snake2, function(x) MCMCglmm(c(dS, dL) ~ -1 + trait:Sex + trait:Mass, rcov = ~us(trait):units, family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = x))
 
 		saveRDS(modelsSnakeMass, file = "./output/models_sex_MR_dSdL_snakes")
 	} else {
