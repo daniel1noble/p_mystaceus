@@ -1,9 +1,10 @@
 #----------------------------------------------------------------------------------#
 # Whiting, Noble & Qi. Diemetic signal in Phyrnocephalus mystaceus
 # Visual modeling code and statistical analysis
-# Date: 2017-04-10 09:43:39 AEST
+# Date: 20 March 2022
 # Contact: Daniel Noble - daniel.noble@unsw.edu.au (UNSW)
 #----------------------------------------------------------------------------------#
+
 # Clean working space
 	rm(list = ls())
 
@@ -19,14 +20,17 @@
 	source("./Analysis/func.R")
 
 # Morphology data for lizards
-	morph <- read.csv("./Data/morph.csv")
+	 morph <- read.csv("./Data/morph.csv")
 	adults <- na.omit(morph[morph$Sex %in% c("f", "m"), c("ID", "Sex","SVL", "right.flap.height", "right.flap.length", "HW", "HL", "Tail", "Mass")])
 
 ## Import spec data for lizards
 	specs <- getspec(where = "Data/mystaceus_all_spec_files", lim = c(300,700), ext = 'txt')
 	specs <- procspec(specs, fixneg = "addmin")
 
+##########################################################################################
 ##----------------------------- BODY REGIONS ANALYSIS------------------------------#
+##########################################################################################
+
 ## Extract the body regions of interest for the analysis.
 ## Body region vector
 	regions    <- c("mouth", "flap", "dorsum")
@@ -54,7 +58,9 @@
 	 sand_sm <- procspec(sand, opt = "smooth" , span = 0.2, fixneg = 'addmin')
 	sand_avg <- aggspec(sand_sm)
 
+##########################################################################################
 #--------------------------- INDIVIDUAL SPECTRAL ANALYSIS -------------------------------#
+##########################################################################################
 
 ## Condense spectral curves across individuals - i.e. average spectra within individuals for body regions
 
@@ -80,9 +86,9 @@
 	 IRA_sm <- procspec(IRA, opt = "smooth" , span = 0.2, fixneg="addmin")
 	IRA_avg <- aggspec(IRA_sm)
 
-
+##########################################################################################
 ##-------------------------------VISUAL MODELING-----------------------------------------#
-
+##########################################################################################
 # Create a dataframe containing the visual sensitivities of cones from lizards - taken from pg 1336 of Chan et al. 2009. Behavioural Ecology, 20: 1334-1342
 
 # Lizard visual system. Warning messages will come up about luminance. Checked with Tom White (Pavo author) and these should be fine.
@@ -140,7 +146,7 @@
 	names(aggregate) <- names(ind_agg)
 	names(error) <- names(ind_agg)
 
-#Create sex vector
+# Create sex vector
 	sexliz  <- lapply(ind_vs_bkg_liz, function(x) factor(substr(x[,1],1,1), levels = c("m", "f", "j")))
 	ind_ID_col_liz <- lapply(ind_vs_bkg_liz, function(x) gsub("[fjm].liz","", x[,1]))
 
@@ -251,13 +257,13 @@
 	if(rerun){
 	modSD <- MCMCglmm(c(log(right.flap.height), log(right.flap.length)) ~ Sex + log(SVL), family = c("gaussian", "gaussian"), nitt = 1000000, thin = 100, data = adults, rcov = ~us(trait):units)
 	saveRDS(modSD, "./output/modSD_morph")
-} else {
-	modSD <- readRDS("./output/modSD_morph")
-}
-	summary(modSD)
-	plot(modSD)
-	autocorr(modSD$VCV)
-	autocorr(modSD$Sol)
+	} else {
+		modSD <- readRDS("./output/modSD_morph")
+	}
+		summary(modSD)
+		plot(modSD)
+		autocorr(modSD$VCV)
+		autocorr(modSD$Sol)
 
 # Flaps flaring analysis
 	matrix <- matrix(c(21,4, 12.5, 12.5), ncol = 2, nrow = 2)
