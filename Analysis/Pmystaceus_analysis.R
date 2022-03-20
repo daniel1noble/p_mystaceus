@@ -265,7 +265,7 @@
 		autocorr(modSD$VCV)
 		autocorr(modSD$Sol)
 
-# Flaps flaring analysis
+# Flaps flaring analysis - Response to Subjugation
 	matrix <- matrix(c(21,4, 12.5, 12.5), ncol = 2, nrow = 2)
 	colnames(matrix) <- c("obs", "exp")
 	rownames(matrix) <- c("flare", "noFlare")
@@ -288,9 +288,6 @@
 			N <- as.matrix(datProp[, 8:ncol(datProp)])
 			rownames(N) <- datProp[,1]
 		
-		# Here we can conduct a fisher's exact test on counts		
-			fisher.test(N)
-
 			name <- substr(colnames(Props), 1, 9)
 			name <- gsub("Tethering", "Tether", name)
 
