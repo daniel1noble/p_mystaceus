@@ -85,7 +85,7 @@
 
 # Create a dataframe containing the visual sensitivities of cones from lizards - taken from pg 1336 of Chan et al. 2009. Behavioural Ecology, 20: 1334-1342
 
-# Lizard visual system
+# Lizard visual system. Warning messages will come up about luminance. Checked with Tom White (Pavo author) and these should be fine.
 	liz_vis <- sensmodel(c(360, 440, 493, 571)) 
 
 	visual_ind_liz    <- lapply(ind_agg, function(x) vismodel(x, visual = liz_vis, illum= IRA_avg[,2], bkg = sand_avg[,2], relative = FALSE, achromatic = "l", vonkries = TRUE, qcatch = "fi"))
@@ -100,7 +100,7 @@
 
 ## Now that we have the ds and dl contrasts against the background using a lizard visual system we can test whether "greater contrast against a background based on a lizard visual system" is associated with morphology and performance controlling for sex differences. We are making an important assumption that ds between leaves and lizard patches across lizards can be detected by lizards. In other words, the difference between ds for each lizard are discriminable. Pretty big assumption, but seems to be used in the colour literature (See Chan et al. 2009. BE, 20:1334-1342 as example. They implicitly assume that higher ds values of females are more discriminable as they increase based on measurements across the season.)
 
-# Bird visual system
+# Bird visual system. Warning messages will come up about luminance. Checked with Tom White (Pavo author) and these should be fine.
 	visual_ind_bird  <- lapply(ind_agg, function(x) vismodel(x, visual = "avg.uv", illum= IRA_avg[,2], bkg = sand_avg[,2], achromatic = "l", relative = FALSE, vonkries = TRUE, qcatch = "fi"))
 
 	coldistance_bird <- lapply(visual_ind_bird, function(x) coldist(x, achro = TRUE, noise = "neural", n = c(1,2,3,3), weber = 0.1))
@@ -110,7 +110,7 @@
 
 	lapply(ind_vs_bkg_bird, head)
 
-# Snake visual system. 
+# Snake visual system.  Warning messages will come up about luminance. Checked with Tom White (Pavo author) and these should be fine.
 	snakeSensModel <- sensmodel(c(360, 482, 554)) # Taken from Sillman et al. 1997.
 	
 	visual_ind_snake  <- lapply(ind_agg, function(x) vismodel(x, visual = snakeSensModel, illum= IRA_avg[,2], bkg = sand_avg[,2], achromatic = "l",relative = FALSE, vonkries = TRUE, qcatch = "fi"))
